@@ -75,3 +75,6 @@ There are a few features and improvement that I would have implemented if given 
 - Show periods of time between lessons.
 - Refactor frontend typescript code to extract functions and setup testing suite.
 - Use PHP Dependency Injection containers to improve test assertion quality on dashboard controller.
+
+## User Interface
+![UserInterface.png](UserInterface.png)
