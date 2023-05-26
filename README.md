@@ -1,66 +1,77 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Installation Steps
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+- Once the project is cloned you will need to copy the `.env.example` to `.env`
+- Enter the `WONDE_TOKEN` to access the Wonde Api.
+- Install Composer dependencies with docker.
 
-## About Laravel
+```
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd):/var/www/html" \
+    -w /var/www/html \
+    laravelsail/php82-composer:latest \
+    composer install --ignore-platform-reqs
+```
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Boot up the docker containers with `./vendor/bin/sail up` or just `sail up` if you have an [alias setup](https://laravel.com/docs/9.x/sail#configuring-a-shell-alias)
+- Run `sail artisan key:generate` to generate application key.
+- Run `sail artisan migrate` to setup database structure for user management.
+- To setup the frontend files with Vite run `sail npm install` then `sail npm run dev`
+- Once containers are running and frontend is setup, in open another terminal and run `sail artisan test --coverage` the tests should all pass with line coverage at 91.5%
+- The application should be ready to use now, for first use go to `[http://localhost/register](http://localhost/register)` to create an account, you should be forwarded to the dashboard `[http://localhost/dashboard](http://localhost/dashboard)` future login can be reached at `http://localhost/login`
+- On the dashboard you should see the first teacher’s classes for the current day, if it doesn’t and says `You're logged in!` please check that Vite is running with `sail npm run dev`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+# Design Specification
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## User Story
 
-## Learning Laravel
+As a Teacher, I want to be able to see which students are in my class each day of the week so that I can be suitably prepared.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Design Specification
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Frontend
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- The frontend will be implemented using Vue.js and TailwindCSS.
+- The user will be able to select a day of the week from a dropdown menu.
+- The user will be able to an employee from a dropdown menu.
+- When a day or employee is selected, the list of students in classes for that day and employee will be updated.
+- Time values will be converted to browser local timezone.
+- A time value between lessons will show the amount of time between each of the lessons.
 
-## Laravel Sponsors
+### Backend
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+- The backend will be implemented using Laravel.
+- The system will fetch a list of employees, classes, students and lessons from the Wonde Api.
+- Redis will be used to store data for a short period of time to prevent large amounts of requests sent to api.
 
-### Premium Partners
+### UI Design
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+![UserInterfaceDesign.png](UserInterfaceDesign.png)
 
-## Contributing
+### Api Data Fetching Plan
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+With a provided `schoolId` I can call the employees endpoint which will provide me with a list of `classIds` with that I can fetch each class and include the lesson times and student names. This should cover the data requirements for this task.
 
-## Code of Conduct
+- Employees(SchoolId)
+    - forename
+    - surname
+    - Classes
+        - classId
+- Classes(classId)
+    - Lessons
+        - start_at
+        - end_at
+    - Students
+        - forename
+        - surname
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Post Implementation Notes
 
-## Security Vulnerabilities
+There are a few features and improvement that I would have implemented if given more time. However, Since the main functionality is complete, I have decided to stop here to avoid taking too long to deliver on the technical test. Below are notes on what I would do to improve this.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- Implement better error handling, on controller and api calls with try catches and returning user friendly messages.
+- Redis caching for Wonde api responses for quicker load subsequent times and remembering last user selected employee.
+- I noticed that some employee lessons are scheduled at the same time. To improve visual representation, I would group them by period instance ID.
+- Show periods of time between lessons.
+- Refactor frontend typescript code to extract functions and setup testing suite.
+- Use PHP Dependency Injection containers to improve test assertion quality on dashboard controller.
