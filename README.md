@@ -1,8 +1,8 @@
 # Installation Steps
 
 - Once the project is cloned you will need to copy the `.env.example` to `.env`
-- Enter the `WONDE_TOKEN` to access the Wonde Api.
-- Install Composer dependencies with docker.
+- Enter the `WONDE_TOKEN` value in the `.env` file to allow access the Wonde Api.
+- Install Composer dependencies with docker with the below command.
 
 ```
 docker run --rm \
@@ -18,7 +18,7 @@ docker run --rm \
 - Run `sail artisan migrate` to setup database structure for user management.
 - To setup the frontend files with Vite run `sail npm install` then `sail npm run dev`
 - Once containers are running and frontend is setup, in open another terminal and run `sail artisan test --coverage` the tests should all pass with line coverage at 91.5%
-- The application should be ready to use now, for first use go to `[http://localhost/register](http://localhost/register)` to create an account, you should be forwarded to the dashboard `[http://localhost/dashboard](http://localhost/dashboard)` future login can be reached at `http://localhost/login`
+- The application should be ready to use now, for first use go to `http://localhost/register` to create an account, you should be forwarded to the dashboard `http://localhost/dashboard` future login can be reached at `http://localhost/login`
 - On the dashboard you should see the first teacher’s classes for the current day, if it doesn’t and says `You're logged in!` please check that Vite is running with `sail npm run dev`
 
 # Design Specification
@@ -32,7 +32,7 @@ As a Teacher, I want to be able to see which students are in my class each day o
 ### Frontend
 
 - The frontend will be implemented using Vue.js and TailwindCSS.
-- The user will be able to select a day of the week from a dropdown menu.
+- The user will be able to select a date from a dropdown menu.
 - The user will be able to an employee from a dropdown menu.
 - When a day or employee is selected, the list of students in classes for that day and employee will be updated.
 - Time values will be converted to browser local timezone.
@@ -70,7 +70,7 @@ With a provided `schoolId` I can call the employees endpoint which will provide 
 There are a few features and improvement that I would have implemented if given more time. However, Since the main functionality is complete, I have decided to stop here to avoid taking too long to deliver on the technical test. Below are notes on what I would do to improve this.
 
 - Implement better error handling, on controller and api calls with try catches and returning user friendly messages.
-- Redis caching for Wonde api responses for quicker load subsequent times and remembering last user selected employee.
+- Redis caching for Wonde api responses for quicker subsequent load times and remembering last user selected employee.
 - I noticed that some employee lessons are scheduled at the same time. To improve visual representation, I would group them by period instance ID.
 - Show periods of time between lessons.
 - Refactor frontend typescript code to extract functions and setup testing suite.
